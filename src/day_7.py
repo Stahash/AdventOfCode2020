@@ -2,10 +2,6 @@ from sys import argv
 from os import chdir
 from re import findall
 
-#shiny gold bags contain 4 shiny tomato bags, 5 wavy indigo bags.
-#wavy indigo bags contain 3 dim green bags, 5 shiny lavender bags, 3 posh olive bags, 1 dull crimson bag.
-    # dim green bags contain no other bags.
-    # shiny lavender bags contain 3 faded plum bags, 2 mirrored crimson bags, 5 striped orange bags, 5 bright magenta bags.
 
 def find_parents(list_bags, data):
 
@@ -42,7 +38,10 @@ def find_childrens(list_bags, data):
                     bugs_names = [' '.join(bag_contain[i].split()[1:3]) for i in range(len(bag_contain))]
 
                     for bag_name, number in zip(bugs_names, number_bugs):
-                        childrens[bag_name] = number * list_bags[bag]
+                        if bag_name in childrens:
+                            childrens[bag_name] += number * list_bags[bag]
+                        else:
+                            childrens[bag_name] = number * list_bags[bag]
 
                     number_childrens += sum(number_bugs) * list_bags[bag]
 
