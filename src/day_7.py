@@ -2,6 +2,10 @@ from sys import argv
 from os import chdir
 from re import findall
 
+#shiny gold bags contain 4 shiny tomato bags, 5 wavy indigo bags.
+#wavy indigo bags contain 3 dim green bags, 5 shiny lavender bags, 3 posh olive bags, 1 dull crimson bag.
+    # dim green bags contain no other bags.
+    # shiny lavender bags contain 3 faded plum bags, 2 mirrored crimson bags, 5 striped orange bags, 5 bright magenta bags.
 
 def find_parents(list_bags, data):
 
@@ -21,18 +25,28 @@ def find_parents(list_bags, data):
 
 def find_childrens(list_bags, data):
 
-    list_childrens = list()
+    childrens = dict()
+    number_childrens = 0
 
     for bag_rule in data:
+        bag_rule = bag_rule[:-1]
 
-        for bag in list_bags:
+        for bag in list_bags.keys():
             contain_bags = bag_rule.split('contain')[0]
             if len(findall(bag, contain_bags)) != 0:
-                list_childrens.append(bag_rule.split('contain')[1].strip().split(','))
 
-    list_parents = list(set(list_childrens))
+                if bag_rule.split('contain')[1].strip() != 'no other bags':
+                    bag_contain = bag_rule.split('contain')[1].strip().split(',')
+                    bag_contain = [bag_contain[i].strip() for i in range(len(bag_contain))]
+                    number_bugs = [int(bag_contain[i].split()[0]) for i in range(len(bag_contain))]
+                    bugs_names = [' '.join(bag_contain[i].split()[1:3]) for i in range(len(bag_contain))]
 
-    return list_parents
+                    for bag_name, number in zip(bugs_names, number_bugs):
+                        childrens[bag_name] = number * list_bags[bag]
+
+                    number_childrens += sum(number_bugs) * list_bags[bag]
+
+    return childrens, number_childrens
 
 
 def first_part(data):
@@ -52,9 +66,16 @@ def first_part(data):
 
 def second_part(data):
 
-    your_bag = ['shiny gold']
-    list_bags = find_childrens(your_bag, data)
-    possible_parents = list_bags
+    total_bags_number = 0
+    your_bag = {'shiny gold': 1}
+    list_bags, number_bags = find_childrens(your_bag, data)
+    total_bags_number += number_bags
+
+    while len(list_bags) != 0:
+        list_bags, number_bags = find_childrens(list_bags, data)
+        total_bags_number += number_bags
+
+    return total_bags_number
 
 
 def day_7_solution(folder_name, file_name):
@@ -66,10 +87,10 @@ def day_7_solution(folder_name, file_name):
     input_data = [input_data[i].rstrip() for i in range(len(input_data))]
 
     answer_1 = first_part(input_data)
-   # answer_2 = second_part(input_data)
+    answer_2 = second_part(input_data)
 
     print('Your puzzle answer for first part is {0}'.format(answer_1))
-  #  print('Your puzzle answer for second part is {0}'.format(answer_2))
+    print('Your puzzle answer for second part is {0}'.format(answer_2))
 
 
 if __name__ == "__main__":
