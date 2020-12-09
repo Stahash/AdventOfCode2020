@@ -27,9 +27,30 @@ def first_part(data, steps_back):
     return None
 
 
-def second_part(data):
+def find_contiguous_set(data, sum_value):
 
-    return
+    for i in range(len(data)):
+        test_sum = data[i]
+        list_values = list()
+        list_values.append(data[i])
+        for j in range(i+1, len(data)):
+            test_sum += data[j]
+            list_values.append(data[j])
+            if test_sum > sum_value:
+                break
+            elif test_sum == sum_value:
+                return list_values
+            else:
+                continue
+
+    return None
+
+
+def second_part(data, sum_value):
+
+    contiguous_set = find_contiguous_set(data, sum_value)
+
+    return min(contiguous_set) + max(contiguous_set)
 
 
 def day_9_solution(folder_name, file_name):
@@ -42,7 +63,7 @@ def day_9_solution(folder_name, file_name):
 
     steps_back = 25
     answer_1 = first_part(input_data, steps_back)
-    answer_2 = second_part(input_data)
+    answer_2 = second_part(input_data, answer_1)
 
     print('Your puzzle answer for first part is {0}'.format(answer_1))
     print('Your puzzle answer for second part is {0}'.format(answer_2))
