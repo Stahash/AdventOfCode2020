@@ -46,9 +46,40 @@ def first_part(data):
     return one_jolt_differences * three_jolt_differences
 
 
+def find_children(previous_children, data):
+
+    next_children = list()
+
+    for child in previous_children:
+
+        if (child + 1) in data:
+            next_children.append(child + 1)
+
+        if (child + 2) in data:
+            next_children.append(child + 2)
+
+        if (child + 3) in data:
+            next_children.append(child + 3)
+
+    return next_children
+
+
 def second_part(data):
 
-    return None
+    starting_node = 0
+    sorted_data = sorted(data)
+    sorted_data.append(max(data)+3)
+    list_children = list()
+    list_children.append(starting_node)
+
+    max_number_children = 0
+
+    while list_children:
+        list_children = find_children(list_children, sorted_data)
+        if len(list_children) > max_number_children:
+            max_number_children = len(list_children)
+
+    return max_number_children
 
 
 def day_10_solution(folder_name, file_name):
