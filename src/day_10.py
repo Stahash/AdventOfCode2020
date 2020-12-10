@@ -1,5 +1,6 @@
 from sys import argv
 from os import chdir
+from time import time
 
 
 def first_part(data):
@@ -65,21 +66,26 @@ def find_children(previous_children, data):
 
 
 def second_part(data):
+    start_time = time()
 
     starting_node = 0
     sorted_data = sorted(data)
-    sorted_data.append(max(data)+3)
+    final_node = max(data) + 3
+    sorted_data.append(final_node)
     list_children = list()
     list_children.append(starting_node)
 
-    max_number_children = 0
+    paths_number = 0
 
     while list_children:
         list_children = find_children(list_children, sorted_data)
-        if len(list_children) > max_number_children:
-            max_number_children = len(list_children)
+        paths_number += list_children.count(final_node)
+        print('Path number is {0}; number of childrens at current step is {1}'.format(paths_number, len(list_children)))
 
-    return max_number_children
+    execution_time = (time() - start_time)/60.0
+    print('Took {0} minutes'.format(execution_time))
+
+    return paths_number
 
 
 def day_10_solution(folder_name, file_name):
