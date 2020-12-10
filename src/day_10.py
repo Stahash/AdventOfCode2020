@@ -47,22 +47,21 @@ def first_part(data):
     return one_jolt_differences * three_jolt_differences
 
 
-def find_children(previous_children, data):
+def find_children(parents, data, last_node):
 
-    next_children = list()
+    children = dict()
 
-    for child in previous_children:
+    for node, node_freq in parents.items():
+        if (node + 1) in data:
+            children[node + 1] = children.get(node+1, 0) + node_freq
+        if (node + 2) in data:
+            children[node+2] = children.get(node+2, 0) + node_freq
+        if (node + 3) in data:
+            children[node+3] = children.get(node+3, 0) + node_freq
 
-        if (child + 1) in data:
-            next_children.append(child + 1)
+    finished_paths_number = children.get(last_node, 0)
 
-        if (child + 2) in data:
-            next_children.append(child + 2)
-
-        if (child + 3) in data:
-            next_children.append(child + 3)
-
-    return next_children
+    return children, finished_paths_number
 
 
 def second_part(data):
@@ -72,20 +71,17 @@ def second_part(data):
     sorted_data = sorted(data)
     final_node = max(data) + 3
     sorted_data.append(final_node)
-    list_children = list()
-    list_children.append(starting_node)
+    children = {starting_node: 1}
 
-    paths_number = 0
+    number_paths = 0
+    while children:
+        children, finished_paths = find_children(children, sorted_data, final_node)
+        number_paths += finished_paths
 
-    while list_children:
-        list_children = find_children(list_children, sorted_data)
-        paths_number += list_children.count(final_node)
-        print('Path number is {0}; number of childrens at current step is {1}'.format(paths_number, len(list_children)))
+    execution_time = time() - start_time
+    print('Took {0} seconds'.format(execution_time))
 
-    execution_time = (time() - start_time)/60.0
-    print('Took {0} minutes'.format(execution_time))
-
-    return paths_number
+    return number_paths
 
 
 def day_10_solution(folder_name, file_name):
