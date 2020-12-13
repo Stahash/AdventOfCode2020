@@ -50,11 +50,94 @@ def first_part(data):
     return abs(x) + abs(y)
 
 
+def move_waypoint_without_rotation(current_direction, delta, prev_x, prev_y):
+
+    new_x = None
+    new_y = None
+
+    if current_direction == 'N':
+        new_x = prev_x
+        new_y = prev_y + delta
+    elif current_direction == 'S':
+        new_x = prev_x
+        new_y = prev_y - delta
+    elif current_direction == 'E':
+        new_x = prev_x + delta
+        new_y = prev_y
+    elif current_direction == 'W':
+        new_x = prev_x - delta
+        new_y = prev_y
+
+    return new_x, new_y
+
+
+def move_ship(delta,
+              current_waypoint_x, current_waypoint_y,
+              current_ship_x, current_ship_y):
+
+    new_ship_x = current_ship_x + delta*current_waypoint_x
+    new_ship_y = current_ship_y + delta*current_waypoint_y
+
+    return new_ship_x, new_ship_y
+
+
+def change_compass_course(current_direction, delta, prev_waypoint_x, prev_waypoint_y):
+
+    new_waypoint_x = None
+    new_waypoint_y = None
+
+    new_angle = delta % 360
+
+    if new_angle == 0 and current_direction in ['L', 'R']:
+        new_waypoint_x = prev_waypoint_x
+        new_waypoint_y = prev_waypoint_y
+
+    if new_angle == 180 and current_direction in ['L', 'R']:
+        new_waypoint_x = -prev_waypoint_x
+        new_waypoint_y = -prev_waypoint_y
+
+    if new_angle == 90 and current_direction == 'L':
+        new_waypoint_x = -prev_waypoint_y
+        new_waypoint_y = prev_waypoint_x
+
+    if new_angle == 90 and current_direction == 'R':
+        new_waypoint_x = prev_waypoint_y
+        new_waypoint_y = -prev_waypoint_x
+
+    if new_angle == 270 and current_direction == 'L':
+        new_waypoint_x = prev_waypoint_y
+        new_waypoint_y = -prev_waypoint_x
+
+    if new_angle == 270 and current_direction == 'R':
+        new_waypoint_x = -prev_waypoint_y
+        new_waypoint_y = prev_waypoint_x
+
+    return new_waypoint_x, new_waypoint_y
+
+
 def second_part(data):
 
+    ship_x = 0
+    ship_y = 0
 
+    waypoint_x = 10
+    waypoint_y = 1
 
-    return None
+    for command in data:
+        direction = command[0]
+        steps = int(command[1:])
+
+        if direction in ['N', 'S', 'W', 'E']:
+            waypoint_x, waypoint_y = \
+                move_waypoint_without_rotation(direction, steps, waypoint_x, waypoint_y)
+
+        elif direction == 'F':
+            ship_x, ship_y = move_ship(steps, waypoint_x, waypoint_y, ship_x, ship_y)
+
+        elif direction in ['L', 'R']:
+            waypoint_x, waypoint_y = change_compass_course(direction, steps, waypoint_x, waypoint_y)
+
+    return abs(ship_x) + abs(ship_y)
 
 
 def day_12_solution(folder_name, file_name):
