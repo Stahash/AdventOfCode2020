@@ -63,8 +63,8 @@ def check_main_rule(main_rule):
 
 def substitute_rules(rules_set, substitutes):
 
-    for substitute in substitutes:
-        rule_substitute = rules_set[substitute]
+    for substitute in substitutes.keys():
+        rule_substitute = substitutes[substitute]
 
         for rule in rules_set.keys():
             current_rule = rules_set[rule]
@@ -94,7 +94,7 @@ def substitute_rules(rules_set, substitutes):
 
 def delete_substitutes(rules_set, substitutes):
 
-    for substitute in substitutes:
+    for substitute in substitutes.keys():
         del rules_set[substitute]
 
     return rules_set
@@ -102,7 +102,7 @@ def delete_substitutes(rules_set, substitutes):
 
 def find_substitutes(rules_set):
 
-    substitutes = list()
+    substitutes = dict()
 
     for rule in rules_set.keys():
         current_rule = rules_set[rule]
@@ -116,7 +116,7 @@ def find_substitutes(rules_set):
                 consists_of_letters.append(True)
 
         if False not in consists_of_letters:
-            substitutes.append(rule)
+            substitutes[rule] = rules_set[rule]
 
     return substitutes
 
@@ -142,11 +142,11 @@ def first_part(rules, messages):
     a_position, b_position = find_initials_ab_positions(rules)
     rules = format_rules(rules, a_position, b_position)
     main_rule_ready = check_main_rule(rules['0'])
-    substitutes_list = [a_position, b_position]
+    substitutes_list = {a_position: rules[a_position], b_position: rules[b_position]}
 
     while main_rule_ready is False:
-        rules = substitute_rules(rules, substitutes_list)
         rules = delete_substitutes(rules, substitutes_list)
+        rules = substitute_rules(rules, substitutes_list)
         substitutes_list = find_substitutes(rules)
         main_rule_ready = check_main_rule(rules['0'])
 
@@ -156,22 +156,93 @@ def first_part(rules, messages):
     return number_correct_messages
 
 
+def correct_rest_of_rules(rules_set):
+
+    for rule in rules_set.keys():
+        current_rule = rules_set[rule]
+
+        if rule != '0':
+            ab_subrules = list()
+            recursive_subrules = list()
+            for sub_rule in current_rule:
+                elements = sub_rule.split(' ')
+                if set(elements) in [{'a', 'b'}, {'a'}, {'b'}]:
+                    ab_subrules.append(sub_rule)
+                else:
+                    recursive_subrules.append(sub_rule)
+
+            updated_rule = list()
+            for sub_rule_i in ab_subrules:
+                updated_rule.append(sub_rule_i)
+
+            for sub_rule_i in recursive_subrules:
+                elements = sub_rule_i.split(' ')
+                index = [i for i in range(len(elements)) if elements[i] == rule]
+                variants = list(product(ab_subrules, repeat=len(index)))
+                for variant in variants:
+                    for i in range(len(index)):
+                        elements[index[i]] = variant[i]
+
+                    modified_subrule = ' '.join(elements)
+                    updated_rule.append(modified_subrule)
+
+            rules_set[rule] = updated_rule
+
+    return rules_set
+
+
+def find_correct_messages(possible_messages, all_messages):
+
+    correct_messages = 0
+    for message in possible_messages:
+        current_message = ''.join(message.split(' '))
+        if current_message in all_messages:
+            correct_messages += 1
+
+    return correct_messages
+
+
 def second_part(rules, messages):
 
-    return None
+    print('Second part:')
+    a_position, b_position = find_initials_ab_positions(rules)
+    rules = format_rules(rules, a_position, b_position)
+    substitutes_list = {a_position: rules[a_position], b_position: rules[b_position]}
+
+    while substitutes_list:
+        rules = delete_substitutes(rules, substitutes_list)
+        rules = substitute_rules(rules, substitutes_list)
+        substitutes_list = find_substitutes(rules)
+
+    print('    - Correct rules with loop')
+    rules = correct_rest_of_rules(rules)
+
+    print('    - Find last substitutes')
+    substitutes_list = find_substitutes(rules)
+
+    print('    - Delete last substitutes from set of rules')
+    rules = delete_substitutes(rules, substitutes_list)
+
+    print('    - Put substitutes in main rule')
+    rules = substitute_rules(rules, substitutes_list)
+
+    print('    - Find all correct messages')
+    number_correct_messages = find_correct_messages(rules['0'], messages)
+
+    return number_correct_messages
 
 
 def day_19_solution(folder_name, file_name):
 
     chdir('..')
     path_to_input = folder_name + '/' + file_name
-
     rules, messages = read_input_file(path_to_input)
-
     answer_1 = first_part(rules, messages)
-    answer_2 = second_part(rules, messages)
-
     print('Your puzzle answer for first part is {0}'.format(answer_1))
+
+    path_to_input = folder_name + '/' + file_name.split('.txt')[0] + '_part2.txt'
+    rules, messages = read_input_file(path_to_input)
+    answer_2 = second_part(rules, messages)
     print('Your puzzle answer for second part is {0}'.format(answer_2))
 
 
